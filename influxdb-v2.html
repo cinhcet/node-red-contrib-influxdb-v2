@@ -1,0 +1,219 @@
+<!--
+  Copyright (c) 2020 cinhcet
+ 
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+
+
+<script type="text/javascript">
+  RED.nodes.registerType('influxdb-v2 config', {
+    category: 'config',
+    defaults: {
+      url: {
+        value: 'http://127.0.0.1:9999',
+        required: true
+      },
+      organization: {
+        value: '',
+        required: true
+      },
+      name: {
+        value: ''
+      }
+    },
+    credentials: {
+      token: {
+        type: "password", 
+        required: true
+      }
+    },
+    label: function() {
+      return this.name || this.url + " - " + this.organization;
+    }
+  });
+</script>
+
+<script type="text/x-red" data-template-name="influxdb-v2 config">
+  <div class="form-row">
+    <label for="node-config-input-url"><i class="fa fa-server"></i> URL</label>
+    <input type="text" id="node-config-input-url">
+  </div>
+  <div class="form-row">
+    <label for="node-config-input-token"><i class="fa fa-lock"></i> Token</label>
+    <input type="password" id="node-config-input-token">
+  </div>
+  <div class="form-row">
+    <label for="node-config-input-organization"><i class="fa fa-server"></i> Organization</label>
+    <input type="text" id="node-config-input-organization">
+  </div>
+  <div class="form-row">
+    <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-config-input-name" placeholder="Name">
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="influxdb-v2 config">
+</script>
+
+
+
+<!-- ////////////////////////////////////////////////////////////////////// -->
+
+
+
+<script type="text/javascript">
+  RED.nodes.registerType('influxdb-v2 query', {
+    category: 'storage',
+    color: '#2196F3',
+    defaults: {
+      influxDB: {
+        value: "",
+        required: true,
+        type: "influxdb-v2 config"
+      },
+      name: {
+        value: ""
+      },
+    },
+    inputs: 1,
+    outputs: 1,
+    icon: "hash.png",
+    label: function() {
+      return this.name;
+    }, 
+    paletteLabel: 'influxdb-v2 query'
+  });
+</script>
+
+<script type="text/x-red" data-template-name="influxdb-v2 query">
+  <div class="form-row">
+    <label for="node-input-yad"><i class="fa fa-globe"></i> InfluxDB</label>
+    <input type="text" id="node-input-influxDB">
+  </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="influxdb-v2 query">
+  <p>Query data from an influxDB v2 database</p>
+
+  <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload
+            <span class="property-type">object</span>
+        </dt>
+        <dd>
+          A string that contains the flux query. Pro tip: use a template node to generate that string
+        </dd>
+    </dl>
+
+  <h3>Outputs</h3>
+    <dl class="message-properties">
+      <dt>payload <span class="property-type">object</span></dt>
+      <dd>the result of the query.</dd>
+    </dl>
+</script>
+
+
+
+
+
+<script type="text/javascript">
+  RED.nodes.registerType('influxdb-v2 write', {
+    category: 'storage',
+    color: '#2196F3',
+    defaults: {
+      influxDB: {
+        value: "",
+        required: true,
+        type: "influxdb-v2 config"
+      },
+      flushInterval: {
+        value: 60000,
+        validate: RED.validators.number(),
+        required: true
+      },
+      timePrecision: {
+        value: "ms",
+        required: true
+      },
+      name: {
+        value: ""
+      },
+    },
+    inputs: 1,
+    outputs: 0,
+    icon: "hash.png",
+    label: function() {
+      return this.name;
+    }, 
+    paletteLabel: 'influxdb-v2 write'
+  });
+</script>
+
+<script type="text/x-red" data-template-name="influxdb-v2 write">
+  <div class="form-row">
+    <label for="node-input-yad"><i class="fa fa-globe"></i> InfluxDB</label>
+    <input type="text" id="node-input-influxDB">
+  </div>
+  <div class="form-row">
+    <label for="node-input-flushInterval">Flush interval [ms]</label>
+    <input type="text" id="node-input-flushInterval">
+  </div>
+  <div class="form-row">
+    <label for="node-input-timePrecision"><i class="fa fa-calculator"></i> Time precision</label>
+    <select id="node-input-timePrecision">
+      <option>ms</option>
+      <option>s</option>
+    </select>
+  </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="influxdb-v2 write">
+  <p>Write data to an influxDB v2 database</p>
+
+  <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload
+            <span class="property-type">object</span>
+        </dt>
+        <dd>
+          Should be an object or an array of objects with at least the property
+          <code>measurement</code> and <code>fields</code>.
+          The <code>measurement</code> property is a string defining the measurement to write to.
+          The <code>fields</code> property should be an object with key/value pairs of desired fields.
+          Optionally, can have a <code>tags</code> property, again an object with key/value pairs defining
+          desired tags.
+          Also optionally, can have a <code>timestamp</code> property to specify the timestamp of the write. 
+          Should be a javascript date object.
+        </dd>
+        <dt>bucket <span class="property-type">string</span></dt>
+        <dd> the bucket to write to.</dd>
+    </dl>
+
+
+  <h3>Flush interval</h3>
+    <p>
+      This node caches writes and flushes them only every number of milliseconds specified in
+      the flush interval setting.
+    </p>
+    <p>Set it to 0 to write immediately</p>
+    <p>On deploy or when Node-RED is terminated, it attempts to flush the data</p>
+</script>
